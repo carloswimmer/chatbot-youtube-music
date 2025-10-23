@@ -1,228 +1,228 @@
-# 🎵 Plano de Estudos: Chatbot YouTube Music com RAG
+# 🎵 Study Plan: YouTube Music Chatbot with RAG
 
-**Projeto:** Music Bot - Chatbot de Informações Musicais do YouTube Music  
+**Project:** Music Bot - YouTube Music Information Chatbot  
 **LLM:** Google Gemini  
-**Autor:** Carlos Wimmer  
+**Author:** Carlos Wimmer  
 **GitHub:** https://github.com/carloswimmer/chatbot-youtube-music  
-**Data:** Outubro 2025
+**Date:** October 2025
 
 ---
 
-## 📚 Índice
+## 📚 Table of Contents
 
-1. [Introdução e Conceitos Fundamentais](#1-introdução-e-conceitos-fundamentais)
-2. [Arquitetura do Sistema](#2-arquitetura-do-sistema)
-3. [Setup Inicial do Projeto](#3-setup-inicial-do-projeto)
-4. [Banco de Dados com PostgreSQL e pgvector](#4-banco-de-dados-com-postgresql-e-pgvector)
-5. [Sistema de Embeddings](#5-sistema-de-embeddings)
-6. [API de Ingestão de Dados](#6-api-de-ingestão-de-dados)
-7. [API de Chat com RAG](#7-api-de-chat-com-rag)
-8. [Interface do Usuário](#8-interface-do-usuário)
-9. [Integração com Google Gemini](#9-integração-com-google-gemini)
-10. [Deploy e Próximos Passos](#10-deploy-e-próximos-passos)
+1. [Introduction and Fundamental Concepts](#1-introduction-and-fundamental-concepts)
+2. [System Architecture](#2-system-architecture)
+3. [Initial Project Setup](#3-initial-project-setup)
+4. [Database with PostgreSQL and pgvector](#4-database-with-postgresql-and-pgvector)
+5. [Embeddings System](#5-embeddings-system)
+6. [Data Ingestion API](#6-data-ingestion-api)
+7. [Chat API with RAG](#7-chat-api-with-rag)
+8. [User Interface](#8-user-interface)
+9. [Google Gemini Integration](#9-google-gemini-integration)
+10. [Deploy and Next Steps](#10-deploy-and-next-steps)
 
 ---
 
-## 1. Introdução e Conceitos Fundamentais
+## 1. Introduction and Fundamental Concepts
 
-### 1.1 O que você vai aprender?
+### 1.1 What will you learn?
 
-Este projeto vai te ensinar a construir um **chatbot RAG (Retrieval-Augmented Generation)** do zero. Você vai dominar:
+This project will teach you how to build a **RAG chatbot (Retrieval-Augmented Generation)** from scratch. You will master:
 
-- ✅ **RAG (Retrieval-Augmented Generation)**: Como fazer um LLM responder usando apenas informações específicas
-- ✅ **Vector Embeddings**: Como transformar texto em vetores numéricos para busca semântica
-- ✅ **Similarity Search**: Como encontrar informações relevantes usando distância de cosseno
-- ✅ **Next.js 14 App Router**: Framework React moderno com Server Actions
-- ✅ **Drizzle ORM**: ORM TypeScript-first para PostgreSQL
-- ✅ **Google Gemini API**: LLM da Google para geração de texto
-- ✅ **AI SDK (Vercel)**: Biblioteca para trabalhar com LLMs de forma padronizada
-- ✅ **Docker**: Containerização da aplicação e banco de dados
+- ✅ **RAG (Retrieval-Augmented Generation)**: How to make an LLM respond using only specific information
+- ✅ **Vector Embeddings**: How to transform text into numerical vectors for semantic search
+- ✅ **Similarity Search**: How to find relevant information using cosine distance
+- ✅ **Next.js 14 App Router**: Modern React framework with Server Actions
+- ✅ **Drizzle ORM**: TypeScript-first ORM for PostgreSQL
+- ✅ **Google Gemini API**: Google's LLM for text generation
+- ✅ **AI SDK (Vercel)**: Library for working with LLMs in a standardized way
+- ✅ **Docker**: Application and database containerization
 
-### 1.2 O que é RAG?
+### 1.2 What is RAG?
 
-**RAG (Retrieval-Augmented Generation)** é uma técnica que combina:
+**RAG (Retrieval-Augmented Generation)** is a technique that combines:
 
-1. **Retrieval (Recuperação)**: Buscar informações relevantes de uma base de conhecimento
-2. **Generation (Geração)**: Usar um LLM para gerar respostas baseadas nas informações recuperadas
+1. **Retrieval**: Search for relevant information from a knowledge base
+2. **Generation**: Use an LLM to generate responses based on retrieved information
 
-**Por que usar RAG?**
+**Why use RAG?**
 
-- ❌ **Sem RAG**: O LLM pode "alucinar" (inventar) informações
-- ✅ **Com RAG**: O LLM responde apenas com base em dados verificados
+- ❌ **Without RAG**: The LLM can "hallucinate" (make up) information
+- ✅ **With RAG**: The LLM responds only based on verified data
 
-**Exemplo prático:**
-
-```
-Usuário: "Qual é o álbum mais recente do Taylor Swift?"
-
-Sem RAG:
-→ LLM pode inventar ou usar dados desatualizados do treinamento
-
-Com RAG:
-→ Sistema busca no banco de dados → Encontra "The Tortured Poets Department (2024)"
-→ LLM usa essa informação para responder → Resposta precisa e atualizada
-```
-
-### 1.3 Como funciona a busca vetorial?
-
-**Vector Embeddings** são representações numéricas de texto:
+**Practical example:**
 
 ```
-Texto: "música pop animada"
-→ Embedding: [0.234, -0.567, 0.891, ... ] (1536 dimensões)
+User: "What is Taylor Swift's most recent album?"
 
-Texto: "canção alegre pop"
-→ Embedding: [0.221, -0.543, 0.876, ... ] (muito similar!)
+Without RAG:
+→ LLM might invent or use outdated training data
+
+With RAG:
+→ System searches database → Finds "The Tortured Poets Department (2024)"
+→ LLM uses this information to respond → Accurate and up-to-date answer
 ```
 
-**Busca Semântica:**
+### 1.3 How does vector search work?
 
-- Calcula a **distância de cosseno** entre vetores
-- Quanto menor a distância, mais similar o significado
-- Threshold típico: 0.5 (50% de similaridade)
+**Vector Embeddings** are numerical representations of text:
 
-### 1.4 Fluxo Completo do Sistema
+```
+Text: "upbeat pop song"
+→ Embedding: [0.234, -0.567, 0.891, ... ] (1536 dimensions)
+
+Text: "cheerful pop tune"
+→ Embedding: [0.221, -0.543, 0.876, ... ] (very similar!)
+```
+
+**Semantic Search:**
+
+- Calculates **cosine distance** between vectors
+- The smaller the distance, the more similar the meaning
+- Typical threshold: 0.5 (50% similarity)
+
+### 1.4 Complete System Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  FASE 1: INGESTÃO DE DADOS (Executa 1 vez)                  │
+│  PHASE 1: DATA INGESTION (Runs once)                        │
 └─────────────────────────────────────────────────────────────┘
 
-    1. Dados musicais (JSON/TXT)
+    1. Music data (JSON/TXT)
           ↓
-    2. Processa em chunks de texto
+    2. Process into text chunks
           ↓
-    3. Gera embeddings com Gemini
+    3. Generate embeddings with Gemini
           ↓
-    4. Salva no PostgreSQL (pgvector)
+    4. Save to PostgreSQL (pgvector)
 
 
 ┌─────────────────────────────────────────────────────────────┐
-│  FASE 2: CHAT (Executa a cada pergunta)                     │
+│  PHASE 2: CHAT (Runs for each question)                     │
 └─────────────────────────────────────────────────────────────┘
 
-    1. Usuário faz pergunta
+    1. User asks question
           ↓
-    2. Gera embedding da pergunta
+    2. Generate question embedding
           ↓
-    3. Busca embeddings similares (cosine distance)
+    3. Search for similar embeddings (cosine distance)
           ↓
-    4. Retorna top 4 músicas/informações mais relevantes
+    4. Return top 4 most relevant songs/information
           ↓
-    5. Gemini gera resposta usando o contexto
+    5. Gemini generates response using context
           ↓
-    6. Usuário recebe resposta precisa
+    6. User receives accurate response
 ```
 
 ---
 
-## 2. Arquitetura do Sistema
+## 2. System Architecture
 
-### 2.1 Stack Tecnológica
+### 2.1 Technology Stack
 
-| Camada              | Tecnologia              | Por que usar?                              |
-| ------------------- | ----------------------- | ------------------------------------------ |
-| **Frontend**        | Next.js 14 + React      | Framework full-stack moderno, SEO-friendly |
-| **Styling**         | TailwindCSS + shadcn-ui | Design system rápido e consistente         |
-| **Backend API**     | Next.js API Routes      | APIs integradas no mesmo projeto           |
-| **Database**        | PostgreSQL 16           | Banco relacional robusto                   |
-| **Vector Search**   | pgvector                | Extensão para busca vetorial no Postgres   |
-| **ORM**             | Drizzle ORM             | TypeScript-first, type-safe, performático  |
-| **LLM**             | Google Gemini           | API gratuita/acessível da Google           |
-| **Embeddings**      | text-embedding-004      | Modelo de embeddings do Gemini             |
-| **AI SDK**          | Vercel AI SDK           | Abstração padronizada para LLMs            |
-| **Validation**      | Zod                     | Validação de schemas TypeScript            |
-| **Package Manager** | pnpm                    | Mais rápido e eficiente que npm            |
+| Layer               | Technology              | Why use it?                               |
+| ------------------- | ----------------------- | ----------------------------------------- |
+| **Frontend**        | Next.js 14 + React      | Modern full-stack framework, SEO-friendly |
+| **Styling**         | TailwindCSS + shadcn-ui | Fast and consistent design system         |
+| **Backend API**     | Next.js API Routes      | APIs integrated in the same project       |
+| **Database**        | PostgreSQL 16           | Robust relational database                |
+| **Vector Search**   | pgvector                | Extension for vector search in Postgres   |
+| **ORM**             | Drizzle ORM             | TypeScript-first, type-safe, performant   |
+| **LLM**             | Google Gemini           | Free/accessible Google API                |
+| **Embeddings**      | text-embedding-004      | Gemini embedding model                    |
+| **AI SDK**          | Vercel AI SDK           | Standardized abstraction for LLMs         |
+| **Validation**      | Zod                     | TypeScript schema validation              |
+| **Package Manager** | pnpm                    | Faster and more efficient than npm        |
 
-### 2.2 Estrutura de Pastas
+### 2.2 Folder Structure
 
 ```
 chatbot-youtube-music/
 ├── app/                          # Next.js 14 App Router
 │   ├── api/
 │   │   ├── chat/
-│   │   │   └── route.ts         # API de chat com RAG
+│   │   │   └── route.ts         # RAG chat API
 │   │   └── populate/
-│   │       └── route.ts         # API de ingestão de dados
-│   ├── layout.tsx               # Layout principal
-│   ├── page.tsx                 # Interface de chat
-│   └── globals.css              # Estilos globais
+│   │       └── route.ts         # Data ingestion API
+│   ├── layout.tsx               # Main layout
+│   ├── page.tsx                 # Chat interface
+│   └── globals.css              # Global styles
 ├── components/
-│   └── ui/                      # Componentes shadcn-ui
+│   └── ui/                      # shadcn-ui components
 ├── lib/
 │   ├── ai/
-│   │   └── embedding.ts         # Lógica de embeddings e busca
+│   │   └── embedding.ts         # Embeddings and search logic
 │   ├── db/
-│   │   ├── index.ts            # Conexão com database
-│   │   ├── migrate.ts          # Script de migração
+│   │   ├── index.ts            # Database connection
+│   │   ├── migrate.ts          # Migration script
 │   │   └── schema/
-│   │       ├── resources.ts    # Schema de recursos (músicas)
-│   │       └── embeddings.ts   # Schema de embeddings
+│   │       ├── resources.ts    # Resources schema (songs)
+│   │       └── embeddings.ts   # Embeddings schema
 │   └── actions/
-│       └── resources.ts         # Server Actions para CRUD
+│       └── resources.ts         # Server Actions for CRUD
 ├── scripts/
-│   └── populate-sample-data.ts  # Script para popular banco
-├── docker-compose.yml           # Docker para Postgres
-├── drizzle.config.ts           # Configuração do Drizzle
+│   └── populate-sample-data.ts  # Script to populate database
+├── docker-compose.yml           # Docker for Postgres
+├── drizzle.config.ts           # Drizzle configuration
 ├── package.json
 ├── tsconfig.json
-└── .env                        # Variáveis de ambiente
+└── .env                        # Environment variables
 ```
 
-### 2.3 Esquema do Banco de Dados
+### 2.3 Database Schema
 
 ```sql
--- Tabela de recursos (informações sobre músicas)
+-- Resources table (song information)
 CREATE TABLE resources (
   id VARCHAR(191) PRIMARY KEY,
-  content TEXT NOT NULL,              -- Texto completo sobre a música
-  song_id VARCHAR(191) NOT NULL,      -- ID da música no YouTube Music
+  content TEXT NOT NULL,              -- Full text about the song
+  song_id VARCHAR(191) NOT NULL,      -- Song ID on YouTube Music
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Tabela de embeddings (vetores para busca)
+-- Embeddings table (vectors for search)
 CREATE TABLE embeddings (
   id VARCHAR(191) PRIMARY KEY,
   resource_id VARCHAR(191) REFERENCES resources(id) ON DELETE CASCADE,
-  embedding VECTOR(768) NOT NULL,     -- Vetor de 768 dimensões (Gemini)
+  embedding VECTOR(768) NOT NULL,     -- 768-dimension vector (Gemini)
 );
 
--- Índice HNSW para busca vetorial rápida
+-- HNSW index for fast vector search
 CREATE INDEX embedding_index ON embeddings
   USING hnsw (embedding vector_cosine_ops);
 ```
 
-**Por que duas tabelas?**
+**Why two tables?**
 
-- `resources`: Armazena dados originais (fácil de ler/editar)
-- `embeddings`: Armazena vetores (otimizado para busca)
-- Separação permite gerenciar dados e vetores independentemente
+- `resources`: Stores original data (easy to read/edit)
+- `embeddings`: Stores vectors (optimized for search)
+- Separation allows managing data and vectors independently
 
 ---
 
-## 3. Setup Inicial do Projeto
+## 3. Initial Project Setup
 
-### 3.1 Pré-requisitos
+### 3.1 Prerequisites
 
 ```bash
-# Verificar versões instaladas
+# Check installed versions
 node --version    # >= 18.17.0
 pnpm --version    # >= 8.0.0
 docker --version  # >= 20.10.0
 ```
 
-### 3.2 Criar Projeto Next.js
+### 3.2 Create Next.js Project
 
 ```bash
-# 1. Criar diretório do projeto
+# 1. Create project directory
 mkdir music-bot
 cd music-bot
 
-# 2. Inicializar Next.js com TypeScript
+# 2. Initialize Next.js with TypeScript
 pnpm create next-app@latest . --typescript --tailwind --app --src-dir=false
 
-# Escolher as opções:
+# Choose options:
 # ✔ Would you like to use TypeScript? → Yes
 # ✔ Would you like to use ESLint? → Yes
 # ✔ Would you like to use Tailwind CSS? → Yes
@@ -231,17 +231,17 @@ pnpm create next-app@latest . --typescript --tailwind --app --src-dir=false
 # ✔ Would you like to customize the default import alias? → No
 ```
 
-### 3.3 Instalar Dependências
+### 3.3 Install Dependencies
 
 ```bash
-# AI e LLM
+# AI and LLM
 pnpm add ai @ai-sdk/google
 
-# Database e ORM
+# Database and ORM
 pnpm add drizzle-orm postgres
 pnpm add -D drizzle-kit
 
-# Validação
+# Validation
 pnpm add zod drizzle-zod
 
 # UI Components
@@ -255,60 +255,60 @@ pnpm add nanoid
 pnpm add -D tsx dotenv @types/pg
 ```
 
-**Por que cada biblioteca?**
+**Why each library?**
 
-| Biblioteca       | Propósito                           |
-| ---------------- | ----------------------------------- |
-| `ai`             | Vercel AI SDK - abstração para LLMs |
-| `@ai-sdk/google` | Provider do Gemini para AI SDK      |
-| `drizzle-orm`    | ORM TypeScript-first                |
-| `postgres`       | Driver PostgreSQL para Node.js      |
-| `zod`            | Validação de schemas                |
-| `nanoid`         | Gerador de IDs únicos               |
-| `lucide-react`   | Ícones SVG                          |
+| Library          | Purpose                              |
+| ---------------- | ------------------------------------ |
+| `ai`             | Vercel AI SDK - abstraction for LLMs |
+| `@ai-sdk/google` | Gemini provider for AI SDK           |
+| `drizzle-orm`    | TypeScript-first ORM                 |
+| `postgres`       | PostgreSQL driver for Node.js        |
+| `zod`            | Schema validation                    |
+| `nanoid`         | Unique ID generator                  |
+| `lucide-react`   | SVG icons                            |
 
-### 3.4 Configurar shadcn-ui
+### 3.4 Configure shadcn-ui
 
 ```bash
-# Instalar CLI do shadcn-ui
-pnpm dlx shadcn-ui@latest init
+# Install shadcn-ui CLI
+pnpm dlx shadcn@latest init
 
-# Configurações:
+# Settings:
 # ✔ Which style would you like to use? → Default
 # ✔ Which color would you like to use as base color? → Slate
 # ✔ Would you like to use CSS variables for colors? → Yes
 
-# Adicionar componentes necessários
-pnpm dlx shadcn-ui@latest add button
-pnpm dlx shadcn-ui@latest add input
-pnpm dlx shadcn-ui@latest add avatar
+# Add necessary components
+pnpm dlx shadcn@latest add button
+pnpm dlx shadcn@latest add input
+pnpm dlx shadcn@latest add avatar
 ```
 
-### 3.5 Configurar Variáveis de Ambiente
+### 3.5 Configure Environment Variables
 
-Criar arquivo `.env.local`:
+Create `.env.local` file:
 
 ```bash
 # Database
 DATABASE_URL=postgresql://postgres:password@localhost:5432/musicbot
 
 # Google Gemini API
-GOOGLE_GENERATIVE_AI_API_KEY=sua-chave-aqui
+GOOGLE_GENERATIVE_AI_API_KEY=your-key-here
 
 # Next.js
 NODE_ENV=development
 ```
 
-**Como obter a API Key do Gemini:**
+**How to get Gemini API Key:**
 
-1. Acesse: https://makersuite.google.com/app/apikey
-2. Clique em "Create API Key"
-3. Copie a chave gerada
-4. Cole no `.env.local`
+1. Access: https://makersuite.google.com/app/apikey
+2. Click "Create API Key"
+3. Copy the generated key
+4. Paste into `.env.local`
 
-### 3.6 Configurar TypeScript
+### 3.6 Configure TypeScript
 
-Atualizar `tsconfig.json`:
+Update `tsconfig.json`:
 
 ```json
 {
@@ -337,34 +337,34 @@ Atualizar `tsconfig.json`:
 
 ---
 
-## 4. Banco de Dados com PostgreSQL e pgvector
+## 4. Database with PostgreSQL and pgvector
 
-### 4.1 Por que PostgreSQL + pgvector?
+### 4.1 Why PostgreSQL + pgvector?
 
 **PostgreSQL:**
 
-- ✅ Open-source e maduro (30+ anos)
-- ✅ Suporta JSON, arrays, tipos customizados
-- ✅ ACID compliant (transações confiáveis)
-- ✅ Excelente performance
+- ✅ Open-source and mature (30+ years)
+- ✅ Supports JSON, arrays, custom types
+- ✅ ACID compliant (reliable transactions)
+- ✅ Excellent performance
 
 **pgvector:**
 
-- ✅ Extensão que adiciona suporte a vetores
-- ✅ Índice HNSW (Hierarchical Navigable Small World) para busca rápida
-- ✅ Operações de similaridade otimizadas
-- ✅ Integração nativa com PostgreSQL
+- ✅ Extension that adds vector support
+- ✅ HNSW (Hierarchical Navigable Small World) index for fast search
+- ✅ Optimized similarity operations
+- ✅ Native integration with PostgreSQL
 
-**Alternativas consideradas:**
+**Alternatives considered:**
 
-- Pinecone: Pago, vendor lock-in
-- Weaviate: Complexo para começar
-- ChromaDB: Menos maduro
-- ✅ **pgvector**: Simples, open-source, integrado
+- Pinecone: Paid, vendor lock-in
+- Weaviate: Complex to get started
+- ChromaDB: Less mature
+- ✅ **pgvector**: Simple, open-source, integrated
 
-### 4.2 Setup Docker para PostgreSQL
+### 4.2 Docker Setup for PostgreSQL
 
-Criar `docker-compose.yml`:
+Create `docker-compose.yml`:
 
 ```yaml
 version: '3.8'
@@ -393,26 +393,26 @@ volumes:
   postgres_data:
 ```
 
-Criar `init-db.sql`:
+Create `init-db.sql`:
 
 ```sql
--- Habilitar extensão pgvector
+-- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-**Iniciar o banco:**
+**Start the database:**
 
 ```bash
 docker-compose up -d
 
-# Verificar se está rodando
+# Check if it's running
 docker-compose ps
 docker-compose logs postgres
 ```
 
-### 4.3 Configurar Drizzle ORM
+### 4.3 Configure Drizzle ORM
 
-Criar `drizzle.config.ts`:
+Create `drizzle.config.ts`:
 
 ```typescript
 import type { Config } from 'drizzle-kit';
@@ -430,17 +430,17 @@ export default {
 } satisfies Config;
 ```
 
-**Por que Drizzle?**
+**Why Drizzle?**
 
-- ✅ TypeScript-first (type safety completo)
-- ✅ SQL-like syntax (fácil migração de SQL raw)
-- ✅ Migrations automáticas
+- ✅ TypeScript-first (complete type safety)
+- ✅ SQL-like syntax (easy migration from raw SQL)
+- ✅ Automatic migrations
 - ✅ Zero runtime overhead
-- ✅ Suporte nativo a pgvector
+- ✅ Native pgvector support
 
-### 4.4 Criar Schemas do Banco
+### 4.4 Create Database Schemas
 
-Criar `lib/db/schema/resources.ts`:
+Create `lib/db/schema/resources.ts`:
 
 ```typescript
 import { pgTable, varchar, text, timestamp } from 'drizzle-orm/pg-core';
@@ -463,7 +463,7 @@ export const resources = pgTable('resources', {
     .default(sql`now()`),
 });
 
-// Schema de validação para inserção
+// Validation schema for insertion
 export const insertResourceSchema = createSelectSchema(resources).omit({
   id: true,
   created_at: true,
@@ -473,14 +473,14 @@ export const insertResourceSchema = createSelectSchema(resources).omit({
 export type NewResourceParams = z.infer<typeof insertResourceSchema>;
 ```
 
-**Explicação do código:**
+**Code explanation:**
 
-- `pgTable`: Define tabela no Drizzle
-- `nanoid()`: Gera IDs únicos e curtos (melhor que UUID)
-- `createSelectSchema`: Gera validação Zod automaticamente
-- `omit`: Remove campos auto-gerados do schema de inserção
+- `pgTable`: Defines table in Drizzle
+- `nanoid()`: Generates unique short IDs (better than UUID)
+- `createSelectSchema`: Automatically generates Zod validation
+- `omit`: Removes auto-generated fields from insertion schema
 
-Criar `lib/db/schema/embeddings.ts`:
+Create `lib/db/schema/embeddings.ts`:
 
 ```typescript
 import { pgTable, varchar, vector, index } from 'drizzle-orm/pg-core';
@@ -508,19 +508,19 @@ export const embeddings = pgTable(
 );
 ```
 
-**Detalhes importantes:**
+**Important details:**
 
 - `vector('embedding', { dimensions: 768 })`:
-  - Gemini text-embedding-004 gera vetores de 768 dimensões
-  - OpenAI usa 1536 dimensões (por isso a diferença)
+  - Gemini text-embedding-004 generates 768-dimension vectors
+  - OpenAI uses 1536 dimensions (hence the difference)
 - `references(..., { onDelete: 'cascade' })`:
-  - Se deletar uma música, deleta o embedding também
-- `hnsw`: Algoritmo de índice para busca vetorial rápida
-- `vector_cosine_ops`: Operador para calcular distância de cosseno
+  - If you delete a song, it also deletes the embedding
+- `hnsw`: Index algorithm for fast vector search
+- `vector_cosine_ops`: Operator to calculate cosine distance
 
-### 4.5 Criar Conexão com Database
+### 4.5 Create Database Connection
 
-Criar `lib/db/index.ts`:
+Create `lib/db/index.ts`:
 
 ```typescript
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -532,7 +532,7 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
-// Conexão para queries
+// Connection for queries
 const connectionString = process.env.DATABASE_URL;
 const client = postgres(connectionString, { prepare: false });
 
@@ -541,14 +541,14 @@ export const db = drizzle(client, {
 });
 ```
 
-**Por que `prepare: false`?**
+**Why `prepare: false`?**
 
-- Evita problemas com prepared statements em serverless
-- Necessário para Vercel/Next.js
+- Avoids issues with prepared statements in serverless
+- Necessary for Vercel/Next.js
 
-### 4.6 Criar Script de Migração
+### 4.6 Create Migration Script
 
-Criar `lib/db/migrate.ts`:
+Create `lib/db/migrate.ts`:
 
 ```typescript
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -585,7 +585,7 @@ runMigrate().catch((err) => {
 });
 ```
 
-### 4.7 Adicionar Scripts no package.json
+### 4.7 Add Scripts to package.json
 
 ```json
 {
@@ -603,63 +603,63 @@ runMigrate().catch((err) => {
 }
 ```
 
-### 4.8 Executar Migrações
+### 4.8 Run Migrations
 
 ```bash
-# 1. Gerar arquivos de migração
+# 1. Generate migration files
 pnpm db:generate
 
-# 2. Aplicar migrações no banco
+# 2. Apply migrations to database
 pnpm db:migrate
 
-# 3. (Opcional) Visualizar banco com Drizzle Studio
+# 3. (Optional) View database with Drizzle Studio
 pnpm db:studio
-# Acesse: https://local.drizzle.studio
+# Access: https://local.drizzle.studio
 ```
 
 ---
 
-## 5. Sistema de Embeddings
+## 5. Embeddings System
 
-### 5.1 O que são Embeddings?
+### 5.1 What are Embeddings?
 
-**Embeddings** são representações vetoriais de texto que capturam significado semântico.
+**Embeddings** are vector representations of text that capture semantic meaning.
 
 ```
-Exemplo:
+Example:
 
-Texto 1: "música alegre e animada"
+Text 1: "upbeat happy song"
 Embedding 1: [0.8, 0.3, -0.5, 0.2, ...]
 
-Texto 2: "canção feliz e energética"
+Text 2: "cheerful energetic tune"
 Embedding 2: [0.75, 0.28, -0.48, 0.19, ...]
-                ↑ Muito similar!
+                ↑ Very similar!
 
-Texto 3: "filme de terror assustador"
+Text 3: "scary horror movie"
 Embedding 3: [-0.6, -0.9, 0.7, -0.4, ...]
-                ↑ Muito diferente!
+                ↑ Very different!
 ```
 
-**Como funciona:**
+**How it works:**
 
-1. Modelo treinado em bilhões de textos
-2. Aprende relações semânticas entre palavras
-3. Projeta texto em espaço vetorial de alta dimensão
-4. Textos similares ficam próximos no espaço vetorial
+1. Model trained on billions of texts
+2. Learns semantic relationships between words
+3. Projects text into high-dimensional vector space
+4. Similar texts are close in vector space
 
 ### 5.2 Gemini Embeddings vs OpenAI
 
-| Característica  | Gemini (text-embedding-004) | OpenAI (text-embedding-ada-002) |
+| Feature         | Gemini (text-embedding-004) | OpenAI (text-embedding-ada-002) |
 | --------------- | --------------------------- | ------------------------------- |
-| **Dimensões**   | 768                         | 1536                            |
-| **Custo**       | Grátis até 1500 req/dia     | $0.10 / 1M tokens               |
-| **Performance** | Excelente                   | Excelente                       |
+| **Dimensions**  | 768                         | 1536                            |
+| **Cost**        | Free up to 1500 req/day     | $0.10 / 1M tokens               |
+| **Performance** | Excellent                   | Excellent                       |
 | **Rate Limit**  | 1500 req/min                | 3000 req/min                    |
-| **Idiomas**     | Multilíngue                 | Multilíngue                     |
+| **Languages**   | Multilingual                | Multilingual                    |
 
-### 5.3 Implementar Sistema de Embeddings
+### 5.3 Implement Embeddings System
 
-Criar `lib/ai/embedding.ts`:
+Create `lib/ai/embedding.ts`:
 
 ```typescript
 import { google } from '@ai-sdk/google';
@@ -669,19 +669,19 @@ import { db } from '../db';
 import { embeddings } from '../db/schema/embeddings';
 import { resources } from '../db/schema/resources';
 
-// Modelo de embeddings do Gemini
+// Gemini embedding model
 const embeddingModel = google.textEmbeddingModel('text-embedding-004');
 
 /**
- * Gera embedding para um único texto
- * @param value - Texto para gerar embedding
- * @returns Array de números representando o embedding (768 dimensões)
+ * Generates embedding for a single text
+ * @param value - Text to generate embedding for
+ * @returns Array of numbers representing the embedding (768 dimensions)
  */
 export const generateEmbedding = async (value: string): Promise<number[]> => {
-  // Limpar texto (remover quebras de linha e espaços extras)
+  // Clean text (remove line breaks and extra spaces)
   const input = value.replaceAll('\\n', ' ').trim();
 
-  // Validar entrada
+  // Validate input
   if (!input || input.length === 0) {
     throw new Error('Cannot generate embedding for empty input');
   }
@@ -700,17 +700,17 @@ export const generateEmbedding = async (value: string): Promise<number[]> => {
 };
 
 /**
- * Gera embeddings para múltiplos textos (mais eficiente que gerar um por vez)
- * @param values - Array de textos
- * @returns Array de embeddings
+ * Generates embeddings for multiple texts (more efficient than one by one)
+ * @param values - Array of texts
+ * @returns Array of embeddings
  */
 export const generateEmbeddings = async (
   values: string[]
 ): Promise<number[][]> => {
-  // Limpar todos os textos
+  // Clean all texts
   const inputs = values.map((v) => v.replaceAll('\\n', ' ').trim());
 
-  // Validar entradas
+  // Validate inputs
   if (inputs.some((input) => !input || input.length === 0)) {
     throw new Error('Cannot generate embeddings for empty inputs');
   }
@@ -729,7 +729,7 @@ export const generateEmbeddings = async (
 };
 
 /**
- * Interface para resultados de busca
+ * Interface for search results
  */
 interface SimilarityResult {
   content: string;
@@ -744,11 +744,11 @@ interface SearchResults {
 }
 
 /**
- * Busca conteúdo relevante usando similaridade de embeddings
- * @param userQuery - Pergunta do usuário
- * @param limit - Número máximo de resultados (padrão: 4)
- * @param threshold - Threshold mínimo de similaridade (padrão: 0.5)
- * @returns Resultados ordenados por similaridade
+ * Searches for relevant content using embedding similarity
+ * @param userQuery - User's question
+ * @param limit - Maximum number of results (default: 4)
+ * @param threshold - Minimum similarity threshold (default: 0.5)
+ * @returns Results ordered by similarity
  */
 export const findRelevantContent = async ({
   userQuery,
@@ -760,18 +760,18 @@ export const findRelevantContent = async ({
   threshold?: number;
 }): Promise<SearchResults> => {
   try {
-    // 1. Gerar embedding da pergunta do usuário
+    // 1. Generate embedding for user's question
     const userQueryEmbedding = await generateEmbedding(userQuery);
 
-    // 2. Calcular similaridade usando distância de cosseno
-    // Fórmula: similarity = 1 - cosine_distance
-    // Resultado: 0 (totalmente diferente) a 1 (idêntico)
+    // 2. Calculate similarity using cosine distance
+    // Formula: similarity = 1 - cosine_distance
+    // Result: 0 (completely different) to 1 (identical)
     const similarity = sql<number>`1 - (${cosineDistance(
       embeddings.embedding,
       userQueryEmbedding
     )})`;
 
-    // 3. Buscar documentos similares
+    // 3. Search for similar documents
     const similarResults = await db
       .select({
         content: resources.content,
@@ -784,7 +784,7 @@ export const findRelevantContent = async ({
       .orderBy(desc(similarity))
       .limit(limit);
 
-    // 4. Processar resultados
+    // 4. Process results
     if (similarResults.length === 0) {
       console.log('❌ No results above threshold');
       return {
@@ -794,7 +794,7 @@ export const findRelevantContent = async ({
       };
     }
 
-    // 5. O primeiro resultado é o mais relevante (maior similaridade)
+    // 5. First result is most relevant (highest similarity)
     const idealResponse = {
       content: similarResults[0].content,
       similarity: similarResults[0].similarity,
@@ -822,20 +822,20 @@ export const findRelevantContent = async ({
 };
 ```
 
-**Conceitos-chave explicados:**
+**Key concepts explained:**
 
 1. **Cosine Distance:**
 
    ```
-   Distância = 1 - (A · B) / (||A|| × ||B||)
+   Distance = 1 - (A · B) / (||A|| × ||B||)
 
-   Onde:
-   - A · B = produto escalar dos vetores
-   - ||A||, ||B|| = normas (magnitudes) dos vetores
+   Where:
+   - A · B = dot product of vectors
+   - ||A||, ||B|| = norms (magnitudes) of vectors
 
-   Resultado:
-   - 0 = vetores idênticos (mesma direção)
-   - 1 = vetores opostos
+   Result:
+   - 0 = identical vectors (same direction)
+   - 1 = opposite vectors
    ```
 
 2. **Similarity Score:**
@@ -843,55 +843,55 @@ export const findRelevantContent = async ({
    ```
    Similarity = 1 - Cosine Distance
 
-   Interpretação:
-   - 0.9 - 1.0 = Extremamente similar (quase duplicata)
-   - 0.7 - 0.9 = Muito similar (mesmo tópico)
-   - 0.5 - 0.7 = Similar (relacionado)
-   - < 0.5    = Pouco relacionado (ignorar)
+   Interpretation:
+   - 0.9 - 1.0 = Extremely similar (almost duplicate)
+   - 0.7 - 0.9 = Very similar (same topic)
+   - 0.5 - 0.7 = Similar (related)
+   - < 0.5    = Not very related (ignore)
    ```
 
 3. **Threshold (0.5):**
-   - Filtra resultados muito diferentes
-   - Evita respostas irrelevantes
-   - Pode ser ajustado conforme necessidade
+   - Filters very different results
+   - Avoids irrelevant responses
+   - Can be adjusted as needed
 
 4. **Batch Processing:**
-   - `generateEmbeddings()` processa múltiplos textos de uma vez
-   - Mais eficiente que chamar `generateEmbedding()` em loop
-   - Reduz chamadas à API
+   - `generateEmbeddings()` processes multiple texts at once
+   - More efficient than calling `generateEmbedding()` in a loop
+   - Reduces API calls
 
 ---
 
-## 6. API de Ingestão de Dados
+## 6. Data Ingestion API
 
-### 6.1 Por que precisamos de ingestão?
+### 6.1 Why do we need ingestion?
 
-O chatbot só pode responder sobre informações que estão no banco de dados. A **API de ingestão** permite:
+The chatbot can only respond about information in the database. The **ingestion API** allows:
 
-1. ✅ Adicionar novas músicas ao sistema
-2. ✅ Atualizar informações existentes
-3. ✅ Processar dados em lote (bulk insert)
-4. ✅ Gerar embeddings automaticamente
+1. ✅ Add new songs to the system
+2. ✅ Update existing information
+3. ✅ Process data in batches (bulk insert)
+4. ✅ Automatically generate embeddings
 
-**Fluxo de ingestão:**
+**Ingestion flow:**
 
 ```
-Dados de entrada (JSON)
+Input data (JSON)
   ↓
-Validação (Zod)
+Validation (Zod)
   ↓
-Salvar na tabela 'resources'
+Save to 'resources' table
   ↓
-Gerar embedding do conteúdo
+Generate content embedding
   ↓
-Salvar na tabela 'embeddings'
+Save to 'embeddings' table
   ↓
-Retornar confirmação
+Return confirmation
 ```
 
-### 6.2 Criar Server Actions
+### 6.2 Create Server Actions
 
-Criar `lib/actions/resources.ts`:
+Create `lib/actions/resources.ts`:
 
 ```typescript
 'use server';
@@ -906,16 +906,16 @@ import { embeddings as embeddingsTable } from '@/lib/db/schema/embeddings';
 import { generateEmbedding } from '@/lib/ai/embedding';
 
 /**
- * Cria um novo recurso (música) e gera seu embedding
- * @param input - Dados da música (content, song_id)
- * @returns Mensagem de sucesso ou erro
+ * Creates a new resource (song) and generates its embedding
+ * @param input - Song data (content, song_id)
+ * @returns Success or error message
  */
 export const createResource = async (input: NewResourceParams) => {
   try {
-    // 1. Validar input com Zod
+    // 1. Validate input with Zod
     const { content, song_id } = insertResourceSchema.parse(input);
 
-    // 2. Inserir na tabela resources
+    // 2. Insert into resources table
     const [resource] = await db
       .insert(resources)
       .values({ content, song_id })
@@ -923,11 +923,11 @@ export const createResource = async (input: NewResourceParams) => {
 
     console.log(`✅ Resource created: ${resource.id}`);
 
-    // 3. Gerar embedding do conteúdo
+    // 3. Generate content embedding
     console.log('⏳ Generating embedding...');
     const embedding = await generateEmbedding(content);
 
-    // 4. Salvar embedding na tabela embeddings
+    // 4. Save embedding to embeddings table
     await db.insert(embeddingsTable).values({
       resource_id: resource.id,
       embedding: embedding,
@@ -945,8 +945,8 @@ export const createResource = async (input: NewResourceParams) => {
 };
 
 /**
- * Deleta todos os recursos do banco (usar com cuidado!)
- * @returns Mensagem de confirmação
+ * Deletes all resources from database (use with caution!)
+ * @returns Confirmation message
  */
 export const truncateResources = async () => {
   try {
@@ -962,23 +962,23 @@ export const truncateResources = async () => {
 };
 ```
 
-**Por que Server Actions?**
+**Why Server Actions?**
 
-- ✅ Executam no servidor (acesso seguro ao banco)
+- ✅ Execute on server (secure database access)
 - ✅ TypeScript end-to-end
-- ✅ Não precisam de API routes separadas
-- ✅ Marcador `'use server'` indica execução no servidor
+- ✅ Don't need separate API routes
+- ✅ `'use server'` marker indicates server execution
 
-### 6.3 Criar API Route de Populate
+### 6.3 Create Populate API Route
 
-Criar `app/api/populate/route.ts`:
+Create `app/api/populate/route.ts`:
 
 ```typescript
 import { createResource, truncateResources } from '@/lib/actions/resources';
 import { insertResourceSchema } from '@/lib/db/schema/resources';
 import { z } from 'zod';
 
-// Schema para validar requisição com múltiplos recursos
+// Schema to validate request with multiple resources
 const populateSchema = z.object({
   resources: z
     .array(insertResourceSchema)
@@ -987,24 +987,24 @@ const populateSchema = z.object({
 
 /**
  * POST /api/populate
- * Adiciona múltiplas músicas ao banco de dados
+ * Adds multiple songs to the database
  */
 export async function POST(req: Request) {
   try {
-    // 1. Parse do body
+    // 1. Parse body
     const body = await req.json();
 
-    // 2. Validar com Zod
+    // 2. Validate with Zod
     const { resources } = populateSchema.parse(body);
 
-    // 3. Processar cada recurso
+    // 3. Process each resource
     const results = [];
 
     for (const resource of resources) {
       try {
         const result = await createResource(resource);
         results.push({
-          content: resource.content.substring(0, 50) + '...', // Mostrar apenas início
+          content: resource.content.substring(0, 50) + '...', // Show only beginning
           status: 'success',
           message: result,
         });
@@ -1017,11 +1017,11 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4. Calcular estatísticas
+    // 4. Calculate statistics
     const successCount = results.filter((r) => r.status === 'success').length;
     const errorCount = results.filter((r) => r.status === 'error').length;
 
-    // 5. Retornar resposta
+    // 5. Return response
     return Response.json({
       message: `Processed ${resources.length} resources: ${successCount} successful, ${errorCount} failed`,
       results,
@@ -1034,7 +1034,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Populate endpoint error:', error);
 
-    // Tratamento de erros de validação Zod
+    // Zod validation error handling
     if (error instanceof z.ZodError) {
       return Response.json(
         {
@@ -1045,7 +1045,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Outros erros
+    // Other errors
     return Response.json(
       {
         error: 'Internal server error',
@@ -1058,7 +1058,7 @@ export async function POST(req: Request) {
 
 /**
  * DELETE /api/populate
- * Remove todas as músicas do banco de dados
+ * Removes all songs from the database
  */
 export async function DELETE() {
   try {
@@ -1082,9 +1082,9 @@ export async function DELETE() {
 }
 ```
 
-### 6.4 Criar Dados de Exemplo
+### 6.4 Create Sample Data
 
-Criar `scripts/populate-sample-data.ts`:
+Create `scripts/populate-sample-data.ts`:
 
 ```typescript
 import * as dotenv from 'dotenv';
@@ -1093,51 +1093,51 @@ dotenv.config({ path: '.env.local' });
 
 const sampleSongs = [
   {
-    content: `A música "Bohemian Rhapsody" é interpretada por Queen e foi lançada em 1975 no álbum "A Night at the Opera". 
-              Esta obra-prima do rock progressivo tem duração de 5:55 minutos e foi composta por Freddie Mercury. 
-              A música é conhecida por sua estrutura incomum, combinando elementos de balada, ópera e hard rock. 
-              Considerada uma das maiores músicas de todos os tempos, alcançou o topo das paradas em diversos países 
-              e o videoclipe é considerado um dos primeiros music videos da história.`,
+    content: `The song "Bohemian Rhapsody" is performed by Queen and was released in 1975 on the album "A Night at the Opera". 
+              This progressive rock masterpiece has a duration of 5:55 minutes and was composed by Freddie Mercury. 
+              The song is known for its unusual structure, combining elements of ballad, opera and hard rock. 
+              Considered one of the greatest songs of all time, it reached the top of the charts in several countries 
+              and the music video is considered one of the first music videos in history.`,
     song_id: 'queen-bohemian-rhapsody',
   },
   {
-    content: `"Imagine" de John Lennon foi lançada em 1971 no álbum de mesmo nome. 
-              Esta canção icônica de 3:01 minutos transmite uma mensagem de paz e união mundial. 
-              Com melodia simples ao piano e letra profunda, Imagine tornou-se um hino pacifista. 
-              A música alcançou o 3º lugar nas paradas americanas e continua sendo uma das 
-              composições mais influentes de Lennon após os Beatles.`,
+    content: `"Imagine" by John Lennon was released in 1971 on the album of the same name. 
+              This iconic 3:01 minute song conveys a message of peace and global unity. 
+              With a simple piano melody and profound lyrics, Imagine became a pacifist anthem. 
+              The song reached 3rd place on the American charts and continues to be one of 
+              Lennon's most influential compositions after the Beatles.`,
     song_id: 'john-lennon-imagine',
   },
   {
-    content: `"Hotel California" é uma música da banda Eagles, lançada em 1977 no álbum de mesmo nome. 
-              Com 6:30 minutos de duração, a música é famosa por seu solo de guitarra duplo icônico 
-              executado por Don Felder e Joe Walsh. A letra misteriosa fala sobre um hotel misterioso 
-              na Califórnia e pode ser interpretada como uma crítica ao estilo de vida hedonista 
-              de Los Angeles. Ganhou o Grammy de Gravação do Ano em 1978.`,
+    content: `"Hotel California" is a song by the band Eagles, released in 1977 on the album of the same name. 
+              With 6:30 minutes duration, the song is famous for its iconic dual guitar solo 
+              performed by Don Felder and Joe Walsh. The mysterious lyrics talk about a mysterious hotel 
+              in California and can be interpreted as a critique of the hedonistic lifestyle 
+              of Los Angeles. It won the Grammy for Record of the Year in 1978.`,
     song_id: 'eagles-hotel-california',
   },
   {
-    content: `"Billie Jean" de Michael Jackson foi lançada em 1983 como parte do álbum "Thriller". 
-              A música tem 4:54 minutos e foi escrita e composta pelo próprio Michael Jackson. 
-              Conhecida por sua linha de baixo marcante e o característico "hiccup" vocal de Jackson, 
-              Billie Jean permaneceu 7 semanas no topo da Billboard Hot 100. 
-              O videoclipe foi um dos primeiros de um artista negro a receber rotação pesada na MTV.`,
+    content: `"Billie Jean" by Michael Jackson was released in 1983 as part of the "Thriller" album. 
+              The song is 4:54 minutes long and was written and composed by Michael Jackson himself. 
+              Known for its striking bass line and Jackson's characteristic vocal "hiccup", 
+              Billie Jean remained 7 weeks at the top of the Billboard Hot 100. 
+              The music video was one of the first by a black artist to receive heavy rotation on MTV.`,
     song_id: 'michael-jackson-billie-jean',
   },
   {
-    content: `"Smells Like Teen Spirit" do Nirvana foi lançada em 1991 no álbum "Nevermind". 
-              Com 5:01 minutos de duração, esta música de grunge marcou uma geração e é considerada 
-              o hino do movimento grunge. Composta por Kurt Cobain, a música combina guitarras 
-              distorcidas com uma melodia cativante. Apesar de Cobain não gostar da atenção 
-              que a música recebeu, ela catapultou o Nirvana para o estrelato mundial.`,
+    content: `"Smells Like Teen Spirit" by Nirvana was released in 1991 on the album "Nevermind". 
+              With 5:01 minutes duration, this grunge song marked a generation and is considered 
+              the anthem of the grunge movement. Composed by Kurt Cobain, the song combines distorted guitars 
+              with a catchy melody. Despite Cobain not liking the attention 
+              the song received, it catapulted Nirvana to worldwide stardom.`,
     song_id: 'nirvana-smells-like-teen-spirit',
   },
   {
-    content: `"Like a Prayer" de Madonna foi lançada em 1989 como single principal do álbum de mesmo nome. 
-              A música de 5:43 minutos mistura pop com elementos gospel, apresentando um coro de igreja. 
-              Produzida por Madonna e Patrick Leonard, a canção gerou polêmica devido ao seu videoclipe 
-              que misturava temas religiosos com sexualidade. Mesmo assim, tornou-se um dos maiores 
-              sucessos da carreira de Madonna, alcançando o topo das paradas em diversos países.`,
+    content: `"Like a Prayer" by Madonna was released in 1989 as the lead single from the album of the same name. 
+              The 5:43 minute song mixes pop with gospel elements, featuring a church choir. 
+              Produced by Madonna and Patrick Leonard, the song generated controversy due to its music video 
+              that mixed religious themes with sexuality. Even so, it became one of the biggest 
+              hits of Madonna's career, reaching the top of the charts in several countries.`,
     song_id: 'madonna-like-a-prayer',
   },
 ];
@@ -1176,80 +1176,80 @@ async function populateDatabase() {
 populateDatabase();
 ```
 
-**Como usar:**
+**How to use:**
 
 ```bash
-# 1. Certifique-se que o servidor Next.js está rodando
+# 1. Make sure Next.js server is running
 pnpm dev
 
-# 2. Em outro terminal, execute o script
+# 2. In another terminal, run the script
 pnpm populate
 ```
 
-### 6.5 Testar a API com cURL
+### 6.5 Test API with cURL
 
 ```bash
-# Adicionar uma música
+# Add a song
 curl -X POST http://localhost:3000/api/populate \
   -H "Content-Type: application/json" \
   -d '{
     "resources": [{
-      "content": "Teste de música pop animada com batida eletrônica",
+      "content": "Test upbeat pop song with electronic beat",
       "song_id": "test-song-001"
     }]
   }'
 
-# Limpar todas as músicas (cuidado!)
+# Clear all songs (careful!)
 curl -X DELETE http://localhost:3000/api/populate
 ```
 
 ---
 
-## 7. API de Chat com RAG
+## 7. Chat API with RAG
 
-### 7.1 Fluxo Completo do Chat
+### 7.1 Complete Chat Flow
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  1. Usuário digita: "Me fale sobre músicas do Queen"    │
+│  1. User types: "Tell me about Queen songs"             │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│  2. Frontend envia para: POST /api/chat                 │
+│  2. Frontend sends to: POST /api/chat                   │
 │     Body: { messages: [...] }                           │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│  3. Backend gera embedding da pergunta                  │
+│  3. Backend generates question embedding                │
 │     [0.234, -0.567, 0.891, ...]                         │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│  4. Busca no PostgreSQL (similaridade > 0.5)            │
-│     Retorna: Top 4 músicas mais similares               │
+│  4. Search PostgreSQL (similarity > 0.5)                │
+│     Returns: Top 4 most similar songs                   │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│  5. Monta prompt com contexto:                          │
-│     System: "Você é um assistente musical..."           │
-│     Context: [Informações das 4 músicas encontradas]    │
-│     User: "Me fale sobre músicas do Queen"              │
+│  5. Build prompt with context:                          │
+│     System: "You are a music assistant..."              │
+│     Context: [Information from 4 songs found]           │
+│     User: "Tell me about Queen songs"                   │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│  6. Envia para Gemini (streaming)                       │
-│     Modelo: gemini-1.5-flash                            │
+│  6. Send to Gemini (streaming)                          │
+│     Model: gemini-1.5-flash                             │
 └─────────────────────────────────────────────────────────┘
                          ↓
 ┌─────────────────────────────────────────────────────────┐
-│  7. Resposta em streaming para o frontend               │
-│     "Tenho informações sobre Bohemian Rhapsody..."      │
+│  7. Stream response to frontend                         │
+│     "I have information about Bohemian Rhapsody..."     │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### 7.2 Implementar API de Chat
+### 7.2 Implement Chat API
 
-Criar `app/api/chat/route.ts`:
+Create `app/api/chat/route.ts`:
 
 ```typescript
 import { findRelevantContent } from '@/lib/ai/embedding';
@@ -1257,24 +1257,24 @@ import { google } from '@ai-sdk/google';
 import { streamText, tool } from 'ai';
 import { z } from 'zod';
 
-// Permitir streaming por até 30 segundos
+// Allow streaming for up to 30 seconds
 export const maxDuration = 30;
 
-// Modelo Gemini para geração de texto
+// Gemini model for text generation
 const model = google('gemini-1.5-flash-latest');
 
 export async function POST(req: Request) {
   try {
-    // 1. Parse do body
+    // 1. Parse body
     const { messages } = await req.json();
 
-    // 2. Extrair última mensagem do usuário
+    // 2. Extract latest user message
     const latestMessage = messages[messages.length - 1];
     const userQuery = latestMessage?.content || '';
 
     console.log(`\n🔍 User query: "${userQuery}"\n`);
 
-    // 3. Buscar conteúdo relevante (RAG)
+    // 3. Search for relevant content (RAG)
     const { results, highestSimilarity } = await findRelevantContent({
       userQuery,
       limit: 4,
@@ -1284,18 +1284,18 @@ export async function POST(req: Request) {
     console.log(`📊 Found ${results.length} relevant songs`);
     console.log(`📈 Highest similarity: ${highestSimilarity.toFixed(3)}\n`);
 
-    // 4. Preparar contexto para o LLM
+    // 4. Prepare context for LLM
     let context = '';
     if (results.length > 0) {
       context = results.map((r, i) => `[${i + 1}] ${r.content}`).join('\n\n');
     }
 
-    // 5. Tool para buscar informações (usado pelo Gemini quando necessário)
+    // 5. Tool to search information (used by Gemini when needed)
     const getInformation = tool({
       description:
-        'Busca informações sobre músicas na base de conhecimento para responder perguntas.',
+        'Search for music information in the knowledge base to answer questions.',
       parameters: z.object({
-        question: z.string().describe('A pergunta do usuário'),
+        question: z.string().describe("The user's question"),
       }),
       execute: async ({ question }) => {
         const searchResults = await findRelevantContent({
@@ -1306,33 +1306,33 @@ export async function POST(req: Request) {
       },
     });
 
-    // 6. Gerar resposta com streaming
+    // 6. Generate response with streaming
     const response = streamText({
       model,
       messages,
-      system: `Você é um assistente musical especializado que ajuda usuários a descobrir informações sobre músicas.
+      system: `You are a specialized music assistant that helps users discover information about songs.
 
-REGRAS IMPORTANTES:
-1. Responda APENAS com base nas informações fornecidas no contexto
-2. Se não houver informações relevantes, diga: "Desculpe, não tenho informações sobre isso na minha base de dados."
-3. Seja preciso e cite detalhes específicos (artista, ano, álbum, duração)
-4. Não invente ou "aluci ne" informações
-5. Use um tom amigável e conversacional
-6. Se o usuário fizer perguntas fora do escopo de música, redirecione gentilmente
+IMPORTANT RULES:
+1. Answer ONLY based on information provided in the context
+2. If there is no relevant information, say: "Sorry, I don't have information about that in my database."
+3. Be precise and cite specific details (artist, year, album, duration)
+4. Do not invent or "hallucinate" information
+5. Use a friendly and conversational tone
+6. If the user asks questions outside the music scope, gently redirect
 
-${context ? `\nCONTEXTO DISPONÍVEL:\n${context}` : '\nNENHUM CONTEXTO RELEVANTE ENCONTRADO.'}`,
+${context ? `\nAVAILABLE CONTEXT:\n${context}` : '\nNO RELEVANT CONTEXT FOUND.'}`,
 
-      // Tools disponíveis para o Gemini
+      // Tools available to Gemini
       tools: {
         getInformation,
       },
 
-      // Configurações de geração
-      temperature: 0.7, // Criatividade moderada
-      maxTokens: 500, // Respostas concisas
+      // Generation settings
+      temperature: 0.7, // Moderate creativity
+      maxTokens: 500, // Concise responses
     });
 
-    // 7. Retornar stream
+    // 7. Return stream
     return response.toDataStreamResponse();
   } catch (error) {
     console.error('❌ Chat API Error:', error);
@@ -1348,7 +1348,7 @@ ${context ? `\nCONTEXTO DISPONÍVEL:\n${context}` : '\nNENHUM CONTEXTO RELEVANTE
 }
 ```
 
-**Conceitos importantes:**
+**Important concepts:**
 
 1. **Streaming Response:**
 
@@ -1356,28 +1356,28 @@ ${context ? `\nCONTEXTO DISPONÍVEL:\n${context}` : '\nNENHUM CONTEXTO RELEVANTE
    streamText({ ... }).toDataStreamResponse()
    ```
 
-   - Resposta é enviada em chunks (pedaços)
-   - Usuário vê texto aparecer em tempo real
-   - Melhor experiência de usuário
+   - Response is sent in chunks
+   - User sees text appear in real-time
+   - Better user experience
 
 2. **Tools (Function Calling):**
-   - Gemini pode decidir usar a tool `getInformation`
-   - Útil para buscas iterativas ou refinamento
-   - Aumenta autonomia do assistente
+   - Gemini can decide to use the `getInformation` tool
+   - Useful for iterative searches or refinement
+   - Increases assistant autonomy
 
 3. **Temperature (0.7):**
-   - 0.0 = Determinístico (sempre mesma resposta)
-   - 1.0 = Muito criativo (pode ser impreciso)
-   - 0.7 = Equilíbrio entre precisão e naturalidade
+   - 0.0 = Deterministic (always same response)
+   - 1.0 = Very creative (may be imprecise)
+   - 0.7 = Balance between precision and naturalness
 
 4. **System Prompt:**
-   - Define comportamento do assistente
-   - Estabelece regras e limitações
-   - Injeta contexto relevante
+   - Defines assistant behavior
+   - Establishes rules and limitations
+   - Injects relevant context
 
-### 7.3 Adicionar Tratamento de Erros
+### 7.3 Add Error Handling
 
-Criar `lib/api/errors/error-handler.ts`:
+Create `lib/api/errors/error-handler.ts`:
 
 ```typescript
 export type ErrorType =
@@ -1402,15 +1402,15 @@ export interface ErrorInfo {
 }
 
 /**
- * Classifica erros e retorna informações estruturadas
+ * Classifies errors and returns structured information
  */
 export function classifyError(error: any): ErrorInfo {
-  // Erro de API do Gemini
+  // Gemini API error
   if (error.status === 429) {
     return {
       errorType: 'API Error',
       errorCode: 'GEMINI_API_ERROR',
-      message: 'Rate limit excedido. Tente novamente em alguns segundos.',
+      message: 'Rate limit exceeded. Try again in a few seconds.',
     };
   }
 
@@ -1418,54 +1418,54 @@ export function classifyError(error: any): ErrorInfo {
     return {
       errorType: 'API Error',
       errorCode: 'GEMINI_API_ERROR',
-      message: 'Erro de autenticação com Gemini API. Verifique sua API key.',
+      message: 'Authentication error with Gemini API. Check your API key.',
     };
   }
 
-  // Erro de rede
+  // Network error
   if (error.name === 'FetchError' || error.code === 'ENOTFOUND') {
     return {
       errorType: 'Network Error',
       errorCode: 'NETWORK_ERROR',
-      message: 'Erro de conexão. Verifique sua internet.',
+      message: 'Connection error. Check your internet.',
     };
   }
 
-  // Erro de validação (Zod)
+  // Validation error (Zod)
   if (error.name === 'ZodError') {
     return {
       errorType: 'Validation Error',
       errorCode: 'VALIDATION_ERROR',
-      message: 'Dados inválidos fornecidos.',
+      message: 'Invalid data provided.',
     };
   }
 
-  // Erro de banco de dados
+  // Database error
   if (error.code?.startsWith('23')) {
     return {
       errorType: 'Internal Error',
       errorCode: 'DATABASE_ERROR',
-      message: 'Erro ao acessar banco de dados.',
+      message: 'Error accessing database.',
     };
   }
 
-  // Erro genérico
+  // Generic error
   return {
     errorType: 'Internal Error',
     errorCode: 'UNKNOWN_ERROR',
-    message: error.message || 'Erro desconhecido.',
+    message: error.message || 'Unknown error.',
   };
 }
 ```
 
-Atualizar `app/api/chat/route.ts` para usar tratamento de erros:
+Update `app/api/chat/route.ts` to use error handling:
 
 ```typescript
 import { classifyError } from '@/lib/api/errors/error-handler';
 
 export async function POST(req: Request) {
   try {
-    // ... código existente
+    // ... existing code
   } catch (error: any) {
     console.error('❌ Chat API Error:', error);
 
@@ -1485,11 +1485,11 @@ export async function POST(req: Request) {
 
 ---
 
-## 8. Interface do Usuário
+## 8. User Interface
 
-### 8.1 Componente de Chat
+### 8.1 Chat Component
 
-Criar `app/page.tsx`:
+Create `app/page.tsx`:
 
 ```typescript
 'use client';
@@ -1518,7 +1518,7 @@ export default function ChatPage() {
             </span>
           </h1>
           <p className="text-sm text-gray-300 mt-1">
-            Pergunte sobre suas músicas favoritas!
+            Ask about your favorite songs!
           </p>
         </div>
       </header>
@@ -1530,17 +1530,17 @@ export default function ChatPage() {
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🎸</div>
               <h2 className="text-2xl font-bold text-white mb-2">
-                Bem-vindo ao Music Bot!
+                Welcome to Music Bot!
               </h2>
               <p className="text-gray-300">
-                Faça perguntas sobre músicas e artistas
+                Ask questions about songs and artists
               </p>
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
                 {[
-                  'Me fale sobre Bohemian Rhapsody',
-                  'Quais músicas do Queen você conhece?',
-                  'O que você sabe sobre John Lennon?',
-                  'Músicas com solo de guitarra marcante',
+                  'Tell me about Bohemian Rhapsody',
+                  'Which Queen songs do you know?',
+                  'What do you know about John Lennon?',
+                  'Songs with iconic guitar solos',
                 ].map((suggestion) => (
                   <button
                     key={suggestion}
@@ -1615,7 +1615,7 @@ export default function ChatPage() {
           <Input
             value={input}
             onChange={handleInputChange}
-            placeholder="Pergunte sobre músicas..."
+            placeholder="Ask about songs..."
             className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-500"
             disabled={isLoading}
           />
@@ -1633,7 +1633,7 @@ export default function ChatPage() {
 }
 ```
 
-**Recursos da UI:**
+**UI Features:**
 
 1. **useChat Hook (AI SDK):**
 
@@ -1642,26 +1642,26 @@ export default function ChatPage() {
      useChat();
    ```
 
-   - Gerencia estado do chat automaticamente
-   - Conecta com `/api/chat`
-   - Streaming em tempo real
+   - Automatically manages chat state
+   - Connects to `/api/chat`
+   - Real-time streaming
 
-2. **Sugestões iniciais:**
-   - Ajuda usuário a começar
-   - Demonstra capacidades do bot
+2. **Initial suggestions:**
+   - Helps user get started
+   - Demonstrates bot capabilities
 
 3. **Loading state:**
-   - Animação de "typing..."
-   - Feedback visual
+   - "Typing..." animation
+   - Visual feedback
 
-4. **Design moderno:**
-   - Gradiente de fundo
+4. **Modern design:**
+   - Background gradient
    - Glassmorphism (backdrop-blur)
-   - Responsivo
+   - Responsive
 
-### 8.2 Estilos Globais
+### 8.2 Global Styles
 
-Atualizar `app/globals.css`:
+Update `app/globals.css`:
 
 ```css
 @tailwind base;
@@ -1702,7 +1702,7 @@ Atualizar `app/globals.css`:
   }
 }
 
-/* Animação customizada para loading */
+/* Custom loading animation */
 @keyframes bounce {
   0%,
   100% {
@@ -1718,9 +1718,9 @@ Atualizar `app/globals.css`:
 }
 ```
 
-### 8.3 Layout Principal
+### 8.3 Main Layout
 
-Atualizar `app/layout.tsx`:
+Update `app/layout.tsx`:
 
 ```typescript
 import type { Metadata } from 'next';
@@ -1730,9 +1730,9 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Music Bot - Seu Assistente Musical',
-  description: 'Chatbot inteligente para descobrir informações sobre músicas',
-  keywords: ['música', 'chatbot', 'AI', 'Gemini'],
+  title: 'Music Bot - Your Music Assistant',
+  description: 'Intelligent chatbot to discover information about songs',
+  keywords: ['music', 'chatbot', 'AI', 'Gemini'],
 };
 
 export default function RootLayout({
@@ -1741,7 +1741,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="en" className="dark">
       <body className={inter.className}>{children}</body>
     </html>
   );
@@ -1750,52 +1750,52 @@ export default function RootLayout({
 
 ---
 
-## 9. Integração com Google Gemini
+## 9. Google Gemini Integration
 
-### 9.1 Por que Gemini?
+### 9.1 Why Gemini?
 
-**Vantagens do Gemini:**
+**Gemini Advantages:**
 
-| Aspecto              | Gemini                | OpenAI GPT       |
-| -------------------- | --------------------- | ---------------- |
-| **Custo**            | Grátis (1500 req/dia) | Pago desde req 1 |
-| **Performance**      | Excelente             | Excelente        |
-| **Context Window**   | 1M tokens (1.5 Pro)   | 128k tokens      |
-| **Multilíngue**      | Otimizado             | Muito bom        |
-| **Streaming**        | Suportado             | Suportado        |
-| **Function Calling** | Suportado             | Suportado        |
+| Aspect               | Gemini              | OpenAI GPT      |
+| -------------------- | ------------------- | --------------- |
+| **Cost**             | Free (1500 req/day) | Paid from req 1 |
+| **Performance**      | Excellent           | Excellent       |
+| **Context Window**   | 1M tokens (1.5 Pro) | 128k tokens     |
+| **Multilingual**     | Optimized           | Very good       |
+| **Streaming**        | Supported           | Supported       |
+| **Function Calling** | Supported           | Supported       |
 
-### 9.2 Modelos Disponíveis
+### 9.2 Available Models
 
 ```typescript
-// Geração de texto
-google('gemini-1.5-flash-latest'); // Rápido, econômico, bom para chat
-google('gemini-1.5-pro-latest'); // Mais poderoso, contexto de 1M tokens
-google('gemini-2.0-flash-exp'); // Experimental, mais recente
+// Text generation
+google('gemini-1.5-flash-latest'); // Fast, economical, good for chat
+google('gemini-1.5-pro-latest'); // More powerful, 1M token context
+google('gemini-2.0-flash-exp'); // Experimental, latest
 
 // Embeddings
-google.textEmbeddingModel('text-embedding-004'); // 768 dimensões
+google.textEmbeddingModel('text-embedding-004'); // 768 dimensions
 ```
 
-**Quando usar cada modelo:**
+**When to use each model:**
 
-- **gemini-1.5-flash**: Chat geral, respostas rápidas (RECOMENDADO para este projeto)
-- **gemini-1.5-pro**: Análises complexas, contexto muito grande
-- **gemini-2.0-flash-exp**: Testes de funcionalidades futuras
+- **gemini-1.5-flash**: General chat, fast responses (RECOMMENDED for this project)
+- **gemini-1.5-pro**: Complex analysis, very large context
+- **gemini-2.0-flash-exp**: Testing future features
 
-### 9.3 Configuração Avançada
+### 9.3 Advanced Configuration
 
-Criar `lib/ai/gemini-config.ts`:
+Create `lib/ai/gemini-config.ts`:
 
 ```typescript
 import { google } from '@ai-sdk/google';
 
 /**
- * Configurações para diferentes modelos Gemini
+ * Configurations for different Gemini models
  */
 export const GEMINI_MODELS = {
   chat: google('gemini-1.5-flash-latest', {
-    // Configurações de segurança (opcional)
+    // Safety settings (optional)
     safetySettings: [
       {
         category: 'HARM_CATEGORY_HATE_SPEECH',
@@ -1811,24 +1811,24 @@ export const GEMINI_MODELS = {
 } as const;
 
 /**
- * Parâmetros de geração padrão
+ * Default generation parameters
  */
 export const DEFAULT_GENERATION_CONFIG = {
-  temperature: 0.7, // Criatividade balanceada
+  temperature: 0.7, // Balanced creativity
   topP: 0.95, // Nucleus sampling
   topK: 40, // Top-k sampling
-  maxTokens: 500, // Limite de tokens na resposta
+  maxTokens: 500, // Token limit in response
 } as const;
 ```
 
-### 9.4 Monitoramento de Uso
+### 9.4 Usage Monitoring
 
-Criar `lib/ai/usage-tracker.ts`:
+Create `lib/ai/usage-tracker.ts`:
 
 ```typescript
 /**
- * Rastreia uso da API do Gemini
- * (Útil para monitorar o limite de 1500 req/dia)
+ * Tracks Gemini API usage
+ * (Useful for monitoring the 1500 req/day limit)
  */
 
 interface UsageStats {
@@ -1847,7 +1847,7 @@ class UsageTracker {
   };
 
   trackRequest(tokens: number = 0) {
-    // Reset diário
+    // Daily reset
     if (this.shouldReset()) {
       this.reset();
     }
@@ -1880,7 +1880,7 @@ class UsageTracker {
   }
 
   private logStatus() {
-    const limit = 1500; // Limite diário do Gemini (free tier)
+    const limit = 1500; // Gemini daily limit (free tier)
     const percentage = ((this.stats.requests / limit) * 100).toFixed(1);
 
     console.log(
@@ -1900,31 +1900,31 @@ class UsageTracker {
 export const usageTracker = new UsageTracker();
 ```
 
-Usar no `app/api/chat/route.ts`:
+Use in `app/api/chat/route.ts`:
 
 ```typescript
 import { usageTracker } from '@/lib/ai/usage-tracker';
 
 export async function POST(req: Request) {
   try {
-    // Trackear requisição
+    // Track request
     usageTracker.trackRequest();
 
-    // ... resto do código
+    // ... rest of code
   } catch (error) {
     usageTracker.trackError();
-    // ... tratamento de erro
+    // ... error handling
   }
 }
 ```
 
 ### 9.5 Rate Limiting
 
-Criar `lib/api/rate-limit.ts`:
+Create `lib/api/rate-limit.ts`:
 
 ```typescript
 /**
- * Rate limiter simples para evitar abuse
+ * Simple rate limiter to prevent abuse
  */
 
 interface RateLimitEntry {
@@ -1946,7 +1946,7 @@ class RateLimiter {
     const now = Date.now();
     const entry = this.requests.get(identifier);
 
-    // Primeira requisição ou janela expirou
+    // First request or window expired
     if (!entry || now > entry.resetTime) {
       this.requests.set(identifier, {
         count: 1,
@@ -1955,13 +1955,13 @@ class RateLimiter {
       return { allowed: true };
     }
 
-    // Dentro da janela
+    // Within window
     if (entry.count < this.maxRequests) {
       entry.count++;
       return { allowed: true };
     }
 
-    // Limite excedido
+    // Limit exceeded
     return {
       allowed: false,
       retryAfter: Math.ceil((entry.resetTime - now) / 1000),
@@ -1978,23 +1978,23 @@ class RateLimiter {
   }
 }
 
-// 10 requisições por minuto
+// 10 requests per minute
 export const rateLimiter = new RateLimiter(10, 60000);
 
-// Limpar periodicamente (a cada 5 minutos)
+// Clean up periodically (every 5 minutes)
 setInterval(() => rateLimiter.cleanup(), 5 * 60 * 1000);
 ```
 
-Usar no `app/api/chat/route.ts`:
+Use in `app/api/chat/route.ts`:
 
 ```typescript
 import { rateLimiter } from '@/lib/api/rate-limit';
 
 export async function POST(req: Request) {
-  // Identificar cliente (IP ou user ID)
+  // Identify client (IP or user ID)
   const identifier = req.headers.get('x-forwarded-for') || 'anonymous';
 
-  // Verificar rate limit
+  // Check rate limit
   const { allowed, retryAfter } = rateLimiter.check(identifier);
 
   if (!allowed) {
@@ -2012,29 +2012,29 @@ export async function POST(req: Request) {
     );
   }
 
-  // ... resto do código
+  // ... rest of code
 }
 ```
 
 ---
 
-## 10. Deploy e Próximos Passos
+## 10. Deploy and Next Steps
 
-### 10.1 Preparar para Produção
+### 10.1 Prepare for Production
 
-**Checklist de produção:**
+**Production checklist:**
 
-- [ ] Variáveis de ambiente configuradas
-- [ ] Rate limiting implementado
-- [ ] Logs estruturados
-- [ ] Tratamento de erros completo
-- [ ] Testes básicos
-- [ ] README.md atualizado
+- [ ] Environment variables configured
+- [ ] Rate limiting implemented
+- [ ] Structured logs
+- [ ] Complete error handling
+- [ ] Basic tests
+- [ ] Updated README.md
 
-### 10.2 Deploy no Vercel
+### 10.2 Deploy to Vercel
 
 ```bash
-# 1. Instalar Vercel CLI
+# 1. Install Vercel CLI
 pnpm add -g vercel
 
 # 2. Login
@@ -2043,49 +2043,49 @@ vercel login
 # 3. Deploy
 vercel
 
-# Seguir instruções:
+# Follow instructions:
 # - Link to existing project? No
 # - Project name? music-bot
 # - Directory? ./
 ```
 
-**Configurar variáveis de ambiente no Vercel:**
+**Configure environment variables on Vercel:**
 
-1. Acesse: https://vercel.com/dashboard
-2. Selecione seu projeto
+1. Access: https://vercel.com/dashboard
+2. Select your project
 3. Settings → Environment Variables
-4. Adicionar:
+4. Add:
    - `DATABASE_URL`
    - `GOOGLE_GENERATIVE_AI_API_KEY`
 
-**Configurar PostgreSQL para produção:**
+**Configure PostgreSQL for production:**
 
-Opções:
+Options:
 
-1. **Vercel Postgres** (recomendado)
-   - Integração nativa
-   - Já inclui pgvector
-2. **Supabase** (grátis até 500MB)
+1. **Vercel Postgres** (recommended)
+   - Native integration
+   - Already includes pgvector
+2. **Supabase** (free up to 500MB)
 3. **Neon** (serverless Postgres)
 
 ### 10.3 GitHub
 
 ```bash
-# Inicializar repositório
+# Initialize repository
 git init
 git add .
 git commit -m "Initial commit: Music Bot with RAG"
 
-# Criar repositório no GitHub
+# Create repository on GitHub
 # https://github.com/carloswimmer
 
 # Push
-git remote add origin https://github.com/carloswimmer/music-bot.git
+git remote add origin https://github.com/carloswimmer/chatbot-youtube-music.git
 git branch -M main
 git push -u origin main
 ```
 
-Criar `.gitignore`:
+Create `.gitignore`:
 
 ```
 # Dependencies
@@ -2115,24 +2115,24 @@ Thumbs.db
 .idea/
 ```
 
-### 10.4 README.md do Projeto
+### 10.4 Project README.md
 
-Criar `README.md`:
+Create `README.md`:
 
 ````markdown
 # 🎵 Music Bot
 
-Chatbot inteligente para descobrir informações sobre músicas, construído com **RAG (Retrieval-Augmented Generation)** e **Google Gemini**.
+Intelligent chatbot to discover information about songs, built with **RAG (Retrieval-Augmented Generation)** and **Google Gemini**.
 
-## ✨ Funcionalidades
+## ✨ Features
 
-- 💬 Chat em tempo real com streaming
-- 🔍 Busca semântica usando embeddings
-- 🎸 Base de conhecimento de músicas clássicas
+- 💬 Real-time chat with streaming
+- 🔍 Semantic search using embeddings
+- 🎸 Knowledge base of classic songs
 - 🤖 Powered by Google Gemini
-- 🚀 Deploy fácil no Vercel
+- 🚀 Easy deploy on Vercel
 
-## 🛠️ Stack Tecnológica
+## 🛠️ Tech Stack
 
 - **Frontend:** Next.js 14 + React + TailwindCSS
 - **Backend:** Next.js API Routes
@@ -2142,140 +2142,140 @@ Chatbot inteligente para descobrir informações sobre músicas, construído com
 - **Embeddings:** text-embedding-004
 - **AI SDK:** Vercel AI SDK
 
-## 🚀 Como Executar
+## 🚀 How to Run
 
-### Pré-requisitos
+### Prerequisites
 
 - Node.js 18+
 - pnpm
-- Docker (para PostgreSQL)
+- Docker (for PostgreSQL)
 - Google Gemini API Key
 
 ### Setup
 
 \`\`\`bash
 
-# 1. Clone o repositório
+# 1. Clone repository
 
-git clone https://github.com/carloswimmer/music-bot.git
-cd music-bot
+git clone https://github.com/carloswimmer/chatbot-youtube-music.git
+cd chatbot-youtube-music
 
-# 2. Instale dependências
+# 2. Install dependencies
 
 pnpm install
 
-# 3. Configure variáveis de ambiente
+# 3. Configure environment variables
 
 cp .env.example .env.local
 
-# Edite .env.local e adicione sua GOOGLE_GENERATIVE_AI_API_KEY
+# Edit .env.local and add your GOOGLE_GENERATIVE_AI_API_KEY
 
-# 4. Inicie o PostgreSQL
+# 4. Start PostgreSQL
 
 docker-compose up -d
 
-# 5. Execute migrações
+# 5. Run migrations
 
 pnpm db:generate
 pnpm db:migrate
 
-# 6. Popule o banco com dados de exemplo
+# 6. Populate database with sample data
 
-pnpm dev # Em outro terminal:
+pnpm dev # In another terminal:
 pnpm populate
 
-# 7. Acesse http://localhost:3000
+# 7. Access http://localhost:3000
 
 \`\`\`
 
-## 📚 Conceitos Aprendidos
+## 📚 Concepts Learned
 
 - ✅ RAG (Retrieval-Augmented Generation)
-- ✅ Vector Embeddings e Similarity Search
-- ✅ PostgreSQL com pgvector
+- ✅ Vector Embeddings and Similarity Search
+- ✅ PostgreSQL with pgvector
 - ✅ Drizzle ORM
 - ✅ Google Gemini API
 - ✅ Next.js 14 App Router
 - ✅ Vercel AI SDK
-- ✅ Streaming de respostas
-- ✅ TypeScript avançado
+- ✅ Response streaming
+- ✅ Advanced TypeScript
 
-## 🎯 Próximos Passos
+## 🎯 Next Steps
 
-- [ ] Adicionar autenticação
-- [ ] Integração com YouTube Music API
-- [ ] Sistema de favoritos
-- [ ] Histórico de conversas
-- [ ] Testes automatizados
-- [ ] CI/CD com GitHub Actions
+- [ ] Add authentication
+- [ ] YouTube Music API integration
+- [ ] Favorites system
+- [ ] Conversation history
+- [ ] Automated tests
+- [ ] CI/CD with GitHub Actions
 
-## 📄 Licença
+## 📄 License
 
 MIT - Carlos Wimmer
 \`\`\`
 
-### 10.5 Próximos Passos de Aprendizado
+### 10.5 Next Learning Steps
 
-Após completar este projeto, você pode:
+After completing this project, you can:
 
-1. **Melhorar a base de conhecimento:**
-   - Integrar com YouTube Music API
-   - Web scraping de letras de músicas
-   - Adicionar informações de álbuns completos
+1. **Improve knowledge base:**
+   - Integrate with YouTube Music API
+   - Web scraping for song lyrics
+   - Add complete album information
 
-2. **Adicionar funcionalidades:**
-   - Autenticação com NextAuth.js
-   - Histórico de conversas persistente
-   - Sistema de recomendação de músicas
-   - Análise de sentimento das letras
+2. **Add features:**
+   - Authentication with NextAuth.js
+   - Persistent conversation history
+   - Music recommendation system
+   - Lyrics sentiment analysis
 
-3. **Otimizações:**
-   - Cache de embeddings (Redis)
-   - Compressão de contexto (LangChain)
-   - Reranking de resultados
-   - Ajuste fino de thresholds
+3. **Optimizations:**
+   - Embeddings cache (Redis)
+   - Context compression (LangChain)
+   - Results reranking
+   - Fine-tune thresholds
 
-4. **Testes:**
+4. **Testing:**
    - Unit tests (Vitest)
    - Integration tests (Playwright)
    - E2E tests
    - Performance benchmarks
 
 5. **DevOps:**
-   - CI/CD com GitHub Actions
-   - Monitoramento (Sentry)
+   - CI/CD with GitHub Actions
+   - Monitoring (Sentry)
    - Analytics (PostHog)
    - Feature flags
 
 ---
 
-## 📋 Resumo de Comandos
+## 📋 Command Summary
 
-### Durante o Desenvolvimento
+### During Development
 
 ```bash
-# Iniciar servidor de desenvolvimento
+# Start development server
 pnpm dev
 
-# Gerar migrations
+# Generate migrations
 pnpm db:generate
 
-# Aplicar migrations
+# Apply migrations
 pnpm db:migrate
 
-# Visualizar banco de dados
+# View database
 pnpm db:studio
 
-# Popular banco com dados
+# Populate database with data
 pnpm populate
 
-# Limpar banco
+# Clear database
 curl -X DELETE http://localhost:3000/api/populate
 
-# Build de produção
+# Production build
 pnpm build
 
-# Iniciar produção
+# Start production
 pnpm start
 ```
 ````
@@ -2283,147 +2283,147 @@ pnpm start
 ### Docker
 
 ```bash
-# Iniciar PostgreSQL
+# Start PostgreSQL
 docker-compose up -d
 
-# Ver logs
+# View logs
 docker-compose logs -f
 
-# Parar
+# Stop
 docker-compose down
 
-# Resetar tudo (CUIDADO: apaga dados)
+# Reset everything (WARNING: deletes data)
 docker-compose down -v
 ```
 
 ---
 
-## 🎓 Conceitos-Chave para Revisão
+## 🎓 Key Concepts for Review
 
 ### 1. RAG (Retrieval-Augmented Generation)
 
-- Combina busca de informações + geração de texto
-- Evita "alucinações" do LLM
-- Base: dados verificados
+- Combines information search + text generation
+- Prevents LLM "hallucinations"
+- Based on verified data
 
 ### 2. Embeddings
 
-- Representações vetoriais de texto
-- Captura significado semântico
-- Permite busca por similaridade
+- Vector representations of text
+- Captures semantic meaning
+- Enables similarity search
 
 ### 3. Cosine Similarity
 
-- Mede ângulo entre vetores
-- 0 = muito diferente, 1 = idêntico
-- Threshold: 0.5 (filtro)
+- Measures angle between vectors
+- 0 = very different, 1 = identical
+- Threshold: 0.5 (filter)
 
 ### 4. pgvector
 
-- Extensão PostgreSQL para vetores
-- Índice HNSW para busca rápida
-- Operadores de distância integrados
+- PostgreSQL extension for vectors
+- HNSW index for fast search
+- Built-in distance operators
 
 ### 5. Streaming
 
-- Resposta em tempo real
-- Melhor UX
-- Menor latência percebida
+- Real-time response
+- Better UX
+- Lower perceived latency
 
 ### 6. Server Actions
 
-- Funções que rodam no servidor
+- Functions that run on server
 - Type-safe
-- Marcador `'use server'`
+- `'use server'` marker
 
 ---
 
-## 🙏 Créditos
+## 🙏 Credits
 
-Projeto de estudos baseado no chatbot-guest-faq, adaptado para aprendizado de conceitos de RAG, embeddings e LLMs.
+Study project based on chatbot-guest-faq, adapted for learning RAG, embeddings and LLMs concepts.
 
-**Autor:** Carlos Wimmer  
+**Author:** Carlos Wimmer  
 **GitHub:** https://github.com/carloswimmer  
-**Data:** Outubro 2025
+**Date:** October 2025
 
 ---
 
-## 📞 Suporte
+## 📞 Support
 
-Se tiver dúvidas durante o desenvolvimento:
+If you have questions during development:
 
-1. Revisar este documento
-2. Consultar documentação oficial:
+1. Review this document
+2. Check official documentation:
    - [Next.js](https://nextjs.org/docs)
    - [Vercel AI SDK](https://sdk.vercel.ai/docs)
    - [Drizzle ORM](https://orm.drizzle.team/docs)
    - [Google Gemini](https://ai.google.dev/docs)
-3. GitHub Issues do projeto
+3. Project GitHub Issues
 
 ---
 
-## ✅ Checklist de Progresso
+## ✅ Progress Checklist
 
-Marque conforme completa cada etapa:
+Mark as you complete each step:
 
-### Setup (Seção 3)
+### Setup (Section 3)
 
-- [ ] 3.1 - Projeto Next.js criado
-- [ ] 3.2 - Dependências instaladas
-- [ ] 3.3 - shadcn-ui configurado
-- [ ] 3.4 - Variáveis de ambiente configuradas
-- [ ] 3.5 - Gemini API Key obtida
+- [ ] 3.1 - Next.js project created
+- [ ] 3.2 - Dependencies installed
+- [ ] 3.3 - shadcn-ui configured
+- [ ] 3.4 - Environment variables configured
+- [ ] 3.5 - Gemini API Key obtained
 
-### Database (Seção 4)
+### Database (Section 4)
 
-- [ ] 4.1 - PostgreSQL rodando no Docker
-- [ ] 4.2 - Drizzle configurado
-- [ ] 4.3 - Schemas criados (resources, embeddings)
-- [ ] 4.4 - Conexão com DB testada
-- [ ] 4.5 - Migrações executadas com sucesso
-- [ ] 4.6 - Drizzle Studio acessível
+- [ ] 4.1 - PostgreSQL running in Docker
+- [ ] 4.2 - Drizzle configured
+- [ ] 4.3 - Schemas created (resources, embeddings)
+- [ ] 4.4 - DB connection tested
+- [ ] 4.5 - Migrations executed successfully
+- [ ] 4.6 - Drizzle Studio accessible
 
-### Embeddings (Seção 5)
+### Embeddings (Section 5)
 
-- [ ] 5.1 - Sistema de embeddings implementado
-- [ ] 5.2 - Função de busca por similaridade funcionando
-- [ ] 5.3 - Testes de embeddings bem-sucedidos
+- [ ] 5.1 - Embeddings system implemented
+- [ ] 5.2 - Similarity search function working
+- [ ] 5.3 - Embeddings tests successful
 
-### API de Ingestão (Seção 6)
+### Ingestion API (Section 6)
 
-- [ ] 6.1 - Server Actions criadas
-- [ ] 6.2 - API `/api/populate` funcionando
-- [ ] 6.3 - Script de população executado
-- [ ] 6.4 - Dados de exemplo no banco
+- [ ] 6.1 - Server Actions created
+- [ ] 6.2 - `/api/populate` API working
+- [ ] 6.3 - Population script executed
+- [ ] 6.4 - Sample data in database
 
-### API de Chat (Seção 7)
+### Chat API (Section 7)
 
-- [ ] 7.1 - API `/api/chat` implementada
-- [ ] 7.2 - RAG funcionando corretamente
-- [ ] 7.3 - Tratamento de erros implementado
-- [ ] 7.4 - Streaming de respostas funcionando
+- [ ] 7.1 - `/api/chat` API implemented
+- [ ] 7.2 - RAG working correctly
+- [ ] 7.3 - Error handling implemented
+- [ ] 7.4 - Response streaming working
 
-### Interface (Seção 8)
+### Interface (Section 8)
 
-- [ ] 8.1 - Componente de chat criado
-- [ ] 8.2 - UI responsiva e bonita
-- [ ] 8.3 - Sugestões de perguntas funcionando
-- [ ] 8.4 - Estados de loading implementados
+- [ ] 8.1 - Chat component created
+- [ ] 8.2 - Responsive and beautiful UI
+- [ ] 8.3 - Question suggestions working
+- [ ] 8.4 - Loading states implemented
 
-### Gemini (Seção 9)
+### Gemini (Section 9)
 
-- [ ] 9.1 - Integração com Gemini funcionando
-- [ ] 9.2 - Models configurados corretamente
-- [ ] 9.3 - Usage tracker implementado
-- [ ] 9.4 - Rate limiting funcionando
+- [ ] 9.1 - Gemini integration working
+- [ ] 9.2 - Models configured correctly
+- [ ] 9.3 - Usage tracker implemented
+- [ ] 9.4 - Rate limiting working
 
-### Deploy (Seção 10)
+### Deploy (Section 10)
 
-- [ ] 10.1 - Projeto pronto para produção
-- [ ] 10.2 - Deploy no Vercel realizado
-- [ ] 10.3 - Repositório GitHub criado
-- [ ] 10.4 - README.md completo
+- [ ] 10.1 - Project ready for production
+- [ ] 10.2 - Deployed to Vercel
+- [ ] 10.3 - GitHub repository created
+- [ ] 10.4 - Complete README.md
 
 ---
 
-**Boa sorte com seus estudos! 🚀🎵**
+**Good luck with your studies! 🚀🎵**
