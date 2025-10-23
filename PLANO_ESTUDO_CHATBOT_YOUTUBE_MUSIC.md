@@ -3,7 +3,7 @@
 **Projeto:** Music Bot - Chatbot de Informações Musicais do YouTube Music  
 **LLM:** Google Gemini  
 **Autor:** Carlos Wimmer  
-**GitHub:** https://github.com/carloswimmer  
+**GitHub:** https://github.com/carloswimmer/chatbot-youtube-music  
 **Data:** Outubro 2025
 
 ---
@@ -135,7 +135,7 @@ Texto: "canção alegre pop"
 ### 2.2 Estrutura de Pastas
 
 ```
-music-bot/
+chatbot-youtube-music/
 ├── app/                          # Next.js 14 App Router
 │   ├── api/
 │   │   ├── chat/
